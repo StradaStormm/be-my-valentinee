@@ -1,0 +1,274 @@
+<html>
+  <head>
+    <title>Hey You 💌</title>
+    <HTA:APPLICATION APPLICATIONNAME="Valentine?" BORDER="thin" SCROLL="no" SINGLEINSTANCE="yes"></HTA:APPLICATION>
+
+    <link href="https://fonts.googleapis.com/css2?family=Satisfy&family=Noto+Color+Emoji&display=swap" rel="stylesheet" />
+
+    <style>
+      body {
+        font-family: "Allura", cursive;
+        text-align: center;
+        margin: 0;
+        padding: 20px;
+        background: linear-gradient(135deg, #fde2e4, #fadadd);
+        color: #4a2c2c;
+      }
+
+      #container {
+        max-width: 520px;
+        margin: auto;
+        padding: 30px;
+        background-color: rgba(255, 255, 255, 0.95);
+        border-radius: 25px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+      }
+
+      h3 {
+        font-family: "Allura", cursive;
+        font-size: 26px;
+        margin: 20px 0;
+        display: none;
+        animation: fadeIn 0.6s ease forwards;
+      }
+
+      #questionImage {
+        max-width: 260px;
+        border-radius: 18px;
+        margin: 20px auto;
+        display: block;
+        animation: fadeIn 0.6s ease;
+      }
+
+      button {
+        padding: 12px 28px;
+        font-size: 16px;
+        font-family: "Allura", cursive;
+        margin: 10px;
+        cursor: pointer;
+        border: none;
+        border-radius: 30px;
+        background-color: #e63946;
+        color: white;
+        transition: all 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #d62839;
+        transform: scale(1.05);
+      }
+
+      #controls,
+      #controlsGoOn {
+        display: none;
+      }
+
+      /* 🌸 Toast / Modal */
+      #toastOverlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: none;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+      }
+
+      #toast {
+        background: white;
+        padding: 25px 30px;
+        border-radius: 22px;
+        max-width: 320px;
+        text-align: center;
+        transform: scale(1);
+        transition: transform 0.3s ease;
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.25);
+      }
+
+      #toast h4 {
+        font-family: "Allura", cursive;
+        font-size: 22px;
+        margin-bottom: 18px;
+        color: #4a2c2c;
+      }
+
+      .secondary {
+        background-color: #ccc;
+        color: #333;
+      }
+
+      .secondary:hover {
+        background-color: #b5b5b5;
+      }
+
+      #toast button {
+        margin: 8px;
+      }
+
+      .secondary {
+        background-color: #ccc;
+        color: #333;
+      }
+
+      .secondary:hover {
+        background-color: #b5b5b5;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+          transform: translateY(10px);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @keyframes popIn {
+        to {
+          transform: scale(1);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div id="container">
+      <img id="questionImage" src="" alt="Image" />
+      <h3 id="question"></h3>
+
+      <div id="controls">
+        <button onclick="goBack()">Go Back</button>
+        <button onclick="handleYes()">Yes</button>
+        <button onclick="handleNo()">No</button>
+      </div>
+
+      <div id="controlsGoOn">
+        <button onclick="goBack()">Go Back</button>
+        <button onclick="next()">Go On</button>
+      </div>
+    </div>
+
+    <!-- 🌸 Toast -->
+    <div id="toastOverlay">
+      <div id="toast">
+        <h4 id="toastText">Are you sure? 🥺</h4>
+        <button onclick="acceptValentine()">Okay yes 💘</button>
+        <button class="secondary" onclick="growToast()">No</button>
+      </div>
+    </div>
+
+    <script>
+      const questions = [
+        { text: "Sup Cutie, I wanted to tell you something 😌", controls: "goOn" },
+        {
+          text: "We’ve been talking for a while now, and honestly, talking to you has been the favourite part of my days.",
+          controls: "goOn",
+        },
+        {
+          text: "I really love making you smile. Just the way you smile. ouffff 😍. Us btw you the tall one",
+          controls: "goOn",
+        },
+        {
+          text: "The way your eyes get smaller when you smile makes my heart flutter every single time 🫠",
+          controls: "goOn",
+        },
+        {
+          text: "You feel so cozy. So warm. So easy to be around. And I love that.",
+          controls: "goOn",
+        },
+        {
+          text: "The way you talk is honestly adorable. like wow.",
+          controls: "goOn",
+        },
+        {
+          text: "And you are really, really beautiful. Like. reaaaaally.",
+          controls: "goOn",
+        },
+        {
+          text: "I just wanted you to know that I genuinely enjoy you. A lot.",
+          controls: "goOn",
+        },
+        {
+          text: "So I was hoping I could ask you something 💌",
+          controls: "goOn",
+        },
+        {
+          text: "Would you like to be my Valentine? 💘",
+          controls: "yesNo",
+        },
+      ];
+
+      let index = 0;
+
+      // Toast chaos variables
+      let toastScale = 1;
+      let noClicks = 0;
+
+      const toastMessages = ["Are you sure? 🥺", "Like… really sure?? 😳", "WAIT THINK AGAIN 😭", "Okay no now I’m stressed", "HELLO??? ARE YOU SURE???", "THIS IS YOUR FINAL WARNING 😤💔", "WHY ARE YOU LIKE THIS 😭😭", "OKAY NOW THIS IS PERSONAL"];
+
+      show();
+
+      function show() {
+        const q = document.getElementById("question");
+        const img = document.getElementById("questionImage");
+
+        q.style.display = "none";
+        setTimeout(() => {
+          q.innerHTML = questions[index].text;
+          q.style.display = "block";
+        }, 100);
+
+        img.src = `images/${index + 1}.png`;
+
+        document.getElementById("controls").style.display = questions[index].controls === "yesNo" ? "block" : "none";
+
+        document.getElementById("controlsGoOn").style.display = questions[index].controls === "goOn" ? "block" : "none";
+      }
+
+      function next() {
+        index++;
+        show();
+      }
+
+      function goBack() {
+        if (index > 0) {
+          index--;
+          show();
+        }
+      }
+
+      function handleYes() {
+        // If toast is open, close it
+        document.getElementById("toastOverlay").style.display = "none";
+
+        document.getElementById("question").innerHTML = "You just made me the happiest person ever 💖🥹<br><br>Happy Valentine’s Day 💌";
+
+        document.getElementById("controls").style.display = "none";
+        document.getElementById("controlsGoOn").style.display = "none";
+        document.getElementById("questionImage").style.display = "none";
+      }
+
+      function handleNo() {
+        document.getElementById("toastOverlay").style.display = "flex";
+      }
+
+      function growToast() {
+        noClicks++;
+        toastScale += 0.2;
+
+        const toast = document.getElementById("toast");
+        const text = document.getElementById("toastText");
+
+        toast.style.transform = `scale(${toastScale})`;
+
+        text.innerText = toastMessages[Math.min(noClicks, toastMessages.length - 1)];
+      }
+
+      function acceptValentine() {
+        handleYes();
+      }
+    </script>
+  </body>
+</html>
